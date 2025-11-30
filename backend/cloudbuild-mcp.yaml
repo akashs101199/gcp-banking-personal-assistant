@@ -1,0 +1,38 @@
+steps:
+  # Build MCP server
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - 'Dockerfile.mcp'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/nova-mcp-server:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/nova-mcp-server:latest'
+      - '.'
+  
+  # Push images
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/nova-mcp-server:$COMMIT_SHA'
+  
+  # Deploy MCP server
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'nova-mcp-server'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/nova-mcp-server:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--memory'
+      - '1Gi'
+
+images:
+  - 'gcr.io/$PROJECT_ID/nova-mcp-server:$COMMIT_SHA'

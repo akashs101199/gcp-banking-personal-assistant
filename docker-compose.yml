@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: nova_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=postgresql://nova_user:nova_password@db:5432/nova_db
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4317
+      - OTEL_SERVICE_NAME=nova-backend
+    depends_on:
+      - db
+      - jaeger
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: nova_frontend
+    ports:
+      - "80:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  db:
+    image: postgres:15-alpine
+    container_name: nova_db
+    environment:
+      - POSTGRES_USER=nova_user
+      - POSTGRES_PASSWORD=nova_password
+      - POSTGRES_DB=nova_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: nova_jaeger
+    ports:
+      - "16686:16686" # UI
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+
+volumes:
+  postgres_data:

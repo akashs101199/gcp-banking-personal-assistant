@@ -1,0 +1,55 @@
+# Main Application Build
+steps:
+  # Build main application
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/nova-banking-ai:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/nova-banking-ai:latest'
+      - '.'
+    
+  # Push images
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/nova-banking-ai:$COMMIT_SHA'
+  
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/nova-banking-ai:latest'
+  
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'nova-banking-ai'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/nova-banking-ai:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--memory'
+      - '2Gi'
+      - '--cpu'
+      - '2'
+      - '--timeout'
+      - '3600'
+      - '--concurrency'
+      - '80'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '10'
+
+images:
+  - 'gcr.io/$PROJECT_ID/nova-banking-ai:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/nova-banking-ai:latest'
+
+timeout: '1200s'
