@@ -29,7 +29,14 @@ Our goal is to build a **Complete Customer Service Agent** that:
 *   **Persona**: "Nova" - A professional, warm, and concise banking expert.
 *   **Context Awareness**: Remembers conversation history and user context.
 
-### 3. 🔌 Model Context Protocol (MCP) Integration
+### 3. 🧪 Gen AI Techniques & Tuning
+We employed advanced techniques to ensure production-grade performance:
+*   **Few-Shot Prompting**: The system prompt includes curated examples of "Voice-First" banking interactions to guide the model's style and conciseness.
+*   **System Prompt Engineering**: A robust persona definition ("Nova") enforces strict constraints on response length and tone, optimized for audio output.
+*   **Tool Use (Function Calling)**: The model is fine-tuned to detect when to call external tools (MCP) vs. when to answer directly.
+*   **Streaming Architecture**: We implemented a custom streaming pipeline that tokenizes text and synthesizes audio in real-time chunks to minimize latency.
+
+### 4. 🔌 Model Context Protocol (MCP) Integration
 *   **Standardized Tooling**: Uses the open standard **MCP** to discover and execute tools.
 *   **Dynamic Extensibility**: New tools added to the MCP server are instantly available to the agent.
 *   **Tools Implemented**:
